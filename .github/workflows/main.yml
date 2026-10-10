@@ -8,12 +8,13 @@ jobs:
     timeout-minutes: 360
 
     steps:
-    - name: Set up Chocolatey and Ngrok
+    - name: Download Ngrok Binary
       run: |
-        choco install ngrok -y
+        Invoke-WebRequest -Uri https://equinox.io -OutFile ngrok.zip
+        Expand-Archive -Path ngrok.zip -DestinationPath .
     - name: Authenticate Ngrok
       run: |
-        ngrok authtoken $env:NGROK_AUTH_TOKEN
+        ./ngrok.exe authtoken $env:NGROK_AUTH_TOKEN
       env:
         NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
     - name: Set User Password
@@ -26,9 +27,8 @@ jobs:
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
     - name: Start Ngrok Tunnel and Keep Alive
       run: |
-        Start-Process ngrok -ArgumentList "tcp 3389"
-        Write-Host "RDP Server সফলভাবে চালু হয়েছে। টানেল সচল রাখার জন্য লুপ চলছে..."
-        # ৬ ঘণ্টা (২১৬০০ সেকেন্ড) সার্ভারটি ধরে রাখার জন্য ব্যাকগ্রাউন্ড লুপ
+        Start-Process ./ngrok.exe -ArgumentList "tcp 3389"
+        Write-Host "RDP Server successfully started. Keeping tunnel alive..."
         for ($i = 0; $i -lt 216; $i++) {
             Start-Sleep -Seconds 100
         }
