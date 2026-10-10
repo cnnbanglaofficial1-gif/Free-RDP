@@ -24,7 +24,11 @@ jobs:
       run: |
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-    - name: Start Ngrok Tunnel
+    - name: Start Ngrok Tunnel and Keep Alive
       run: |
         Start-Process ngrok -ArgumentList "tcp 3389"
-        Start-Sleep -Seconds 10
+        Write-Host "RDP Server সফলভাবে চালু হয়েছে। টানেল সচল রাখার জন্য লুপ চলছে..."
+        # ৬ ঘণ্টা (২১৬০০ সেকেন্ড) সার্ভারটি ধরে রাখার জন্য ব্যাকগ্রাউন্ড লুপ
+        for ($i = 0; $i -lt 216; $i++) {
+            Start-Sleep -Seconds 100
+        }
